@@ -1,0 +1,43 @@
+Assignment 3 - Jamie Rajewski
+
+CITATIONS:
+	- Cam's example test_connections.py for assistance in dealing with the
+	send/receive part of my client
+	- https://pymotw.com/2/socket/uds.html - Referenced when creating
+	client in python	
+
+USAGE:
+
+For server:
+./ps_server socketname [-v filename]
+
+For client:
+python3 ps_tester.py socketname connections requests
+
+sort.c/sort.h:
+These files include the binary tree along with a simple linked-list
+implementation; the tree is used for the actual work done (skimming /proc)
+while the linked list is used for keeping track of finished threads.
+
+ps_server.c:
+This is the main file that constitutes the server and all related
+functionality. I decided against using a thread pool to manage my threads
+and instead create threads upon request; in order to deal with finished
+threads, I add the thread to a linked list at the end of their worker function
+and periodically iterate over the linked list, joining the contained threads
+and deleting the associated nodes. This ended up working well, although there
+was one major drawback: it made it incredibly difficult to manage the threads
+that were still running if SIGINT was received during a request. Therefore, my
+final build doesn't properly handle memory management or join the currently
+running thread(s) if interrupted, but if execution completes, there are no
+memory leaks and all threads are joined. Given time constraints, I felt that
+this was a reasonable compromise.
+
+ps_tester.py:
+I decided to write my client in python to see how different the
+implementation was from C. Ultimately, they are very similar, but I then had
+to read up on how to use threads and locks in python so the amount of time
+saved wasn't as substantial as I had hoped when doing it in python. The client
+tests just like in the spec where it will connect to the given socket, create
+as many threads as there are 'connections' given, and for each one of those,
+do 'requests'-number of requests to the server.
